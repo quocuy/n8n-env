@@ -1,0 +1,684 @@
+{
+  "id": "ew3CaVg1UtgGPZhA",
+  "name": "Composable AI Add component",
+  "nodes": [
+    {
+      "parameters": {
+        "public": true,
+        "initialMessages": "",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        380
+      ],
+      "id": "439649af-e1c2-4df9-a141-4c3a0ff8de84",
+      "name": "When chat message received",
+      "webhookId": "e0426087-e6a2-4695-a953-a0e1552745b8"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "maxOutputTokens": 16192,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2160,
+        580
+      ],
+      "id": "001f76f8-2131-4134-ba39-451e938c165e",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2780,
+        800
+      ],
+      "id": "7155ec7f-79ba-4496-abd3-37c6126cecf4",
+      "name": "Embeddings Google Gemini -text-embedding-004",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2480,
+        800
+      ],
+      "id": "aa488163-2fec-476a-a116-f77913eea953",
+      "name": "Embeddings Google Gemini -text-embedding-4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://app-acp.vnpt.vn/api/applications",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Origin",
+              "value": "https://app-acp.vnpt.vn"
+            },
+            {
+              "name": "Host",
+              "value": "app-acp.vnpt.vn"
+            },
+            {
+              "name": "Referer",
+              "value": "https://app-acp.vnpt.vn/apps"
+            },
+            {
+              "name": "Cookie",
+              "value": "COMPOSABLE_TOKEN=7a739657b2e24fdfb826d886fd950223"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"applicationType\":{{ $json.applicationInfo.applicationType }},\n  \"orgId\":\"68216ea8772d745881daf287\",\n  \"name\":\"{{  $now.format('yyyy-MM-dd HH:MM:ss').concat(' generated_app') }}\",\n  \"editingApplicationDSL\": {{ JSON.stringify( $('Code').item['json']['applicationDSL']) }}\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1920,
+        840
+      ],
+      "id": "a7b3401a-e457-40e4-9727-15a65ea6de33",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "json_value = JSON.parse($input.first().json.output.replaceAll('```json','').replaceAll('```',''))\nreturn (json_value)"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3480,
+        380
+      ],
+      "id": "444a5ded-5d70-421b-ac19-ffd28a7f9ccb",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The request was: {{ $('When chat message received').item.json.chatInput }}\nThe application ID is : {{ $json.applicationInfo.applicationId }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant that can understand English and Vietnamese. Always use the provided tools to perform the following task.\n\nYour task is to help users to import the generated JSON template to a Lowcoder-based platform to create or edit program .  Based on the request the user made and the provided application ID, you are to call either the create_app tool to create a new app on Lowcoder or call the edit_app tool to edit the current Lowcider app with that has the provided application ID. The request may be in either Vietnamese or English, reply accordingly based on the request language.\n\nReply whether you have created or edited the app or not, and give some information on the app you just imported to Lowcoder.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        2020,
+        1360
+      ],
+      "id": "d0394958-1825-4cc7-b0d8-746214edf064",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to create the requested app on Lowcoder by importing the generated JSON template",
+        "method": "POST",
+        "url": "=https://acp.vnptsi.vn/api/applications/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"applicationType\":{{ $json.applicationInfo.applicationType }},\n  \"orgId\":\"67e673c487a7a9181ecebd3b\",\n  \"name\":\"{{ $json.applicationInfo.applicationId ?? $now.format('yyyy-MM-dd HH:MM:ss').concat('generated_app') }}\",\n  \"editingApplicationDSL\": {{ JSON.stringify( $('Code').item['json']['applicationDSL']) }}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        1580
+      ],
+      "id": "edf59af8-fe5f-402a-90c9-4e91473467c4",
+      "name": "create_app"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to edit the requested app on Lowcoder by sending the edited layout",
+        "method": "PUT",
+        "url": "=https://acp.vnptsi.vn/api/applications/",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "applicationId",
+              "valueProvider": "fieldValue",
+              "value": "={{ $json.applicationInfo.applicationId }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"id\":\"{{ $json.applicationInfo.applicationId }}\",\n  \"applicationType\":{{ $json.applicationInfo.applicationType }},\n  \"orgId\":\"67e673c487a7a9181ecebd3b\",\n  \"name\":\"{{ $json.applicationInfo.applicationId ?? $now.format('yyyy-MM-dd HH:MM:ss').concat('generated_app') }}\",\n  \"editingApplicationDSL\": {{ JSON.stringify( $('Code').item['json']['applicationDSL']) }}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        2280,
+        1580
+      ],
+      "id": "6e214cb1-7c04-4ba0-b1bd-c8434151ebf0",
+      "name": "edit_app"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('When chat message received').item.json.sessionId }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2040,
+        1580
+      ],
+      "id": "c6d406f7-3f55-4198-b6b5-f20de2105048",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.0-flash-lite",
+        "options": {
+          "maxOutputTokens": 10000,
+          "temperature": 0.3
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1920,
+        1580
+      ],
+      "id": "2a2cbab8-36b9-4984-be70-f815df5c4279",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 4
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        2300,
+        640
+      ],
+      "id": "31e8e49b-c6ef-4d22-994b-4565de337da4",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"assistant_message\": \"Here is the login screen you requested\",\n\t\"assistant_code\": [\"Los Angeles\", \"San Francisco\", \"San Diego\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1920,
+        -60
+      ],
+      "id": "37fb7558-b799-4116-ae93-0c56d3747db4",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "content": "## TODO\n\nDouble check features of each template\nSet credentials w/o manual cookie for Lowcoder\nForamt response: AI will reply in format:\n- Agent respond: reply to user, may ask for clarification such as question of whether the user want the component to act a certain way\n- Code respond: the JSON code. This code will be sent to VNPT Composable.\n\n\nPossible method to integrate with data src from Composable\nIntegrate with VNPT AI (need VNPT AI team to first support function calling and agent mode for RAG lookup)\n\nPossile way to get token to send API to lowcoder/composable (for future prod)\n: Get cookie from GET currentUser when user login/run the app, grab composabletoken in header request then pass to API call",
+        "height": 520,
+        "width": 440
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        40
+      ],
+      "id": "9434e0c4-2dfb-4305-b998-196a2b18efb3",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "get_layouts",
+        "toolDescription": "Use this tool to retrieve the correct JSON layout based on user's request and return the the JSON result that meet the requirements from user.",
+        "tableName": {
+          "__rl": true,
+          "value": "layouts",
+          "mode": "list",
+          "cachedResultName": "layouts"
+        },
+        "topK": "={{3}}",
+        "includeDocumentMetadata": false,
+        "options": {
+          "queryName": "match_layout"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        2420,
+        660
+      ],
+      "id": "678467a9-3b9d-463d-8cef-25ffe3f8f2a9",
+      "name": "Layout Vector Store ",
+      "credentials": {
+        "supabaseApi": {
+          "id": "vbH1N7FbKyqYoxjr",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "get_templates",
+        "toolDescription": "Use this tool to retrieve the correct JSON template based on user's request and return the the JSON result that meet the requirements from user.",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "topK": "={{6}}",
+        "includeDocumentMetadata": false,
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        2680,
+        620
+      ],
+      "id": "0ac4f815-028b-4e7a-aeb7-e71c95eaef10",
+      "name": "Components Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "vbH1N7FbKyqYoxjr",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1920,
+        1100
+      ],
+      "id": "539c6f71-85e0-42b1-83c9-f783868e9012",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "get_query_types",
+        "toolDescription": "Use this tool to retrieve the correct JSON query types based on user's request and return the the JSON result that meet the requirements from user.",
+        "tableName": {
+          "__rl": true,
+          "value": "query_types",
+          "mode": "list",
+          "cachedResultName": "query_types"
+        },
+        "topK": "={{ 1 }}",
+        "includeDocumentMetadata": false,
+        "options": {
+          "queryName": "match_query_types"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        2980,
+        620
+      ],
+      "id": "d234916b-483d-42f6-b8a8-de56d1856309",
+      "name": "Query types Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "vbH1N7FbKyqYoxjr",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        3060,
+        800
+      ],
+      "id": "52f8f25a-c072-4c3c-bc88-2be3fb81f3f4",
+      "name": "Embeddings Google Gemini -text-embedding-5",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a helpful assistant. Always use the provided tools to perform the following task.\n\nYour task is to help users to design application for a low code platform called VNPT Composable based on Lowcoder. The current UNIX datetime is {{ $now.format('x') }} \nThe user will provide you with a description of the app they want to create and what component to be added. The user will ask you in either English or Vietnamese.\n\nYou are to generate JSON layout code for the app and the components within based on the user's description in either language.\n\nYou can look up for the suitable templates to assist you through two tools named 'get_templates' and 'get_layouts' that contain the list of all JSON templates that you must use to create the correct JSON result. The tool provide the templates/layouts name, the purpose of the templates and the templates body. Each template body contains the exhaustive JSON key layout and the description that describe what each key do for the component and the app. 'get_templates' return the templates of app component to be used, while 'get_layouts' return templates of app layout which components can be added inside to provide consistent layout of the resulting application. Not all templates/layouts are required for the application so you can choose which template to use, but all result must follow at least one template.\nWhen user ask to create any component or application you must look up the 'documents' and the 'layouts' table by using the 'get_template' and 'get_layouts' tool, use the most suitable templates in the 'template' column, then you must use the provided structure in the template as a reference to generate the JSON layout code for the component that the user required.\n\nUser may sometimes ask you to set up or modify data query for the application. Use the third tool 'get_query_types' to get the right template for the data query object and add it to the JSON of the app structure to create a data query that meets user's requirements.\n\nWhen user ask you for task specific to JS or SQL, use the JS_SQL_tool to get the correct JS or SQL code for the task\n\n\nYou can omit keys that are not needed for the app or component depending on the required prompt unless the property/key is marked as required in the description. However, the JSON property/key hierarchy of the included keys in the result must not diverge from the structure in the provided template. This means:\n\n- Do not include additional properties or keys in the result JSON if the property or key is not included in the layout in the template. For example, if the chosen template has no property 'url', do not inlcude that property in the result output\n\n- If a key name is the same as the key name of the parent key containing such key, do not omit the parent key in the result JSON. Preserve the key hierarchy of the structure in the template regardless. \n\nOnly reply with the JSON result. \nAll properties which contain stringified JSON like object will use double quotes with escape character instead of single quote \n\nIf the user ask in Vietnamese, try to understand the prompt in English first and generate component based on the English understanding accordingly.\n\n\nHere is the application template that you will add components into when returning the result:\n\n    \"{\\\"applicationInfo\\\":{\\\"name\\\":\\\"The name of the application or module. \\\",\\\"createAt\\\":\\\"The timestamp when the application was created\\\",\\\"createBy\\\":\\\"The ID of the user who created the application. Leave empty value\\\",\\\"applicationId\\\":\\\"The unique ID of the application\\\",\\\"applicationType\\\":\\\"The type of the application. Set to number 1 to indicate this is a configuration for an Application.\\\"},\\\"applicationDSL\\\":{\\\"ui\\\":{\\\"layout\\\":{\\\"{component id}\\\":{\\\"i\\\":\\\"The unique ID of the layout item. Same as parent key {component id}\\\",\\\"h\\\":\\\"The height of the layout item. Required. Value format is number larger than 0\\\",\\\"w\\\":\\\"The width of the layout item. Required. Value format is number larger than 0\\\",\\\"x\\\":\\\"The x-coordinate of the layout item. Required. Value format is number\\\",\\\"y\\\":\\\"The y-coordinate of the layout item. Required. Value format is number\\\",\\\"pos\\\":\\\"The position of the layout item. Required. Default value is 0.\\\"}},\\\"items\\\":{\\\"{component id}\\\":{\\\"compType\\\":\\\"Component type of the component. Required\\\"}}},\\\"queries\\\":[{\\\"compType\\\":\\\"Type of the query component\\\",\\\"comp\\\":{},\\\"id\\\":\\\"The unique ID of the query component\\\",\\\"name\\\":\\\"The name of the query component\\\"}]},\\\"refTree\\\":{\\\"value\\\":\\\"The value of the reference tree. Default is empty string.\\\",\\\"items\\\":[{\\\"value\\\":\\\"The name of the referenced item/component connected to the app such as name of data query object related to the app \\\"},[{\\\"value\\\":\\\"The name of the another referenced item/component connected to the app such as name of data query object related to the app \\\"}]]},\\\"hooks\\\":[{\\\"compType\\\":\\\"The type of hook component (e.g., urlParams)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., dayJsLib)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., lodashJsLib)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., utils)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., message)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., toast)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., localStorage)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., currentUser)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., screenInfo)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"},{\\\"compType\\\":\\\"The type of hook component (e.g., theme)\\\",\\\"comp\\\":{},\\\"name\\\":\\\"The name of the hook\\\"}],\\\"settings\\\":{\\\"title\\\":\\\"The title of the application. Value is empty\\\",\\\"description\\\":\\\"The description of the application. Value is empty\\\",\\\"category\\\":\\\"The category of the application, should be 'Business'\\\",\\\"showHeaderInPublic\\\":\\\"A flag to show the header in public\\\",\\\"themeId\\\":\\\"The ID of the theme, value is 'default'\\\",\\\"preventAppStylesOverwriting\\\":\\\"A flag to prevent app styles overwriting\\\",\\\"disableCollision\\\":\\\"A flag to disable collision\\\",\\\"lowcoderCompVersion\\\":\\\"The version of the lowcoder component, value should be 'latest'\\\",\\\"maxWidth\\\":{\\\"dropdown\\\":\\\"The maximum width for dropdown area containing the input. Value is a number and should be at least 500 or more. Recommeded value is the same as current screen width such as 1920\\\",\\\"input\\\":\\\"The maximum width for input\\\"},\\\"gridRowCount\\\":\\\"The row count of the grid. Normally set to 'Infinity'\\\",\\\"gridPaddingX\\\":\\\"The horizontal padding of the grid\\\",\\\"gridPaddingY\\\":\\\"The vertical padding of the grid\\\"},\\\"preload\\\":{\\\"script\\\":\\\"The script to preload\\\",\\\"css\\\":\\\"The CSS to preload\\\",\\\"globalCSS\\\":\\\"The global CSS to preload\\\"}}\"\n\nNote for the application template:\nThis is the skeletion template that must be conformed to when creating an app. All app request must use this template as a base. When adding components to the response, Each component information will be added added in two keys. \\n'layout' key defines the position and size of the item in the app container window.\\n'items' key define the configuration of the properties component itself such as color, font size\\nFor example a text input component with id 58981460 and a switch with id 6935b1b7 in the app will be represented in the app template like this:\\n  \\\"applicationDSL\\\": {\\n\\t\\\"ui\\\": {\\n         \\\"layout\\\": {\\n           \\\"58981460\\\": {\\n             \\\"i\\\": \\\"58981460\\\",\\n             \\\"pos\\\": \\\"The position of the layout item. Required. Default value is 0.\\\"\\n \\t\\t\\t... (layout/position key-val of component goes here)\\n           },\\n\\t\\t\\\"6935b1b7\\\": {\\n             \\\"i\\\": \\\"6935b1b7\\\",\\n             \\\"pos\\\": \\\"The position of the layout item. Required. Default value is 0.\\\"\\n  \\t\\t... (layout/position key-val of component goes here)\\n           }\\n         },\\n         \\\"items\\\": {\\n           \\\"58981460\\\": {\\n\\t\\t\\t\\\"compType\\\": \\\"input\\\",\\n             ... (item properties key-val of the component goes here)\\n           },\\n           \\\"6935b1b7\\\": {\\n\\t\\t\\t\\\"compType\\\": \\\"switch\\\",\\n             ... (item properties key-val of the component goes here)\\n           },\\n          \\n         }\\n        }\\n        \\n\\t},\\nAny added component must have its properties be added to \\\"layout\\\" and \\\"items\\\" like the example above\n\n",
+          "maxIterations": 4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        2540,
+        380
+      ],
+      "id": "70c5ce22-bbd2-4008-8129-8c227b19e8c8",
+      "name": "AI Agent - DSL generator",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "maxTries": null
+    },
+    {
+      "parameters": {
+        "name": "JS_SQL_tool",
+        "description": "Call this tool to generate Javascript or SQL code to add to the application config JSON file in the 'query' property",
+        "workflowId": {
+          "__rl": true,
+          "value": "KD6BYjSyzmOWzki4",
+          "mode": "list",
+          "cachedResultName": "Composable AI app gen - JS + SQL test 2 fields + DSL subflow"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}",
+            "session_id": "={{ $('When chat message received').item.json.sessionId }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            },
+            {
+              "id": "session_id",
+              "displayName": "session_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string"
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.1,
+      "position": [
+        3280,
+        600
+      ],
+      "id": "42f9223c-6608-4937-91f5-d1ced229173a",
+      "name": "Call JS/SQL AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2000,
+        620
+      ],
+      "id": "6d71e19e-d87d-45df-b5a8-109947b7b1c5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "9tZf9FlLjUXeUikR",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-004": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Components Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-4": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Layout Vector Store ",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_app": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "edit_app": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Layout Vector Store ": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Components Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query types Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-5": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Query types Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent - DSL generator": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call JS/SQL AI Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent - DSL generator",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "4bf43b9a-0ea9-4231-b366-c46b4f14cec1",
+  "owner": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}

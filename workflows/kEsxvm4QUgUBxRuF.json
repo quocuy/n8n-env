@@ -1,0 +1,255 @@
+{
+  "id": "kEsxvm4QUgUBxRuF",
+  "name": "My workflow 3",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\n\nThe task is:\"{{ $json.body.task }}\",\nlanguage is \"{{ $json.body.language }}\",\nmessage is \"{{ $json.body.message }}\" \nRelevant code to {{ $json.body.task }} is {{ JSON.stringify($if($json.body.task!==generate,\"\".concat($json.body.code),\"\")) }},\nAdditional context: {{ JSON.stringify($if($json.body.context  ,($json.body.context),\"Use the previous context if applicable.\")) }}\", \nVNPT Compostable DSL related to the task: {{ JSON.stringify($if($json.body.dsl,JSON.stringify(($json.body.dsl)),\"\")) }}\n}\n\n",
+        "options": {
+          "systemMessage": "=# Identity\nYou are a helpful coding assistant. The current UNIX datetime is {{ $now.format('x') }} \n\n# Instruction\n\nYour task is to help users to design application for a low code platform called VNPT Composable based on Lowcoder by provide coding assistant. The user will ask you in either English or Vietnamese. Your response must match the languauge used by the user.\n\nThe user will provide the following information:\n- The type of tasks\n- The programming language\n- The user request\n- Additional code context\n\n\nFor the type of tasks, you can do the following tasks by user request:\n- \"generate\": Generate code by the request of the user\n- \"fix\": Edit/fix specific code snippet\n- \"explain\": Explain code snippet\n\nIf the type of task are 'fix 'or 'explain' then user will also specify the code snippet to work on.\n\nThe user request are what the user want you to do. Some example of tasks are \"explaning this code\" or \"optimize this code for performance\"\n\nThese are some programming languages that user may ask. Your response code must follow the correct syntax of the specific language based on the language requested:\n- \"postgres\": PostgresSQL\n- \"javascript\" Javascript\n- \"oracle\": Oracle SQL\n- \"mongodb\": MongoDB\n- \"mariadb\": MariaDB SQL\n- \"mysql\": MySQL\n- \"mssql\": Microsoft SQL Server\n\nThe user may also provide additional code context that describe the full code related to the task user requested. The content of the context can be the table structure of related SQL tables for the task or the full code of the program that includes the code snippet to be edited.\n\nAdditionally, the user may also provide the data structure language or DSL of the relevant VNPT Composable application in JSON format. The content of the DSL is the configuration information of the Lowcoder/VNPT Composable application that the JS/SQL code is connected to.\n\nAvoid using double quotes in your response, use single quotes instead. Wrap the relevant code blocks in approriate tags. Values inside the answer must be parsable in JSON string format to avoid parsing problems. You response should be helpful and descriptive to the user. If users attempt to derail the conversation by asking non coding related query, ask them to stay on topic.\n\nYou are to answer in this format:\n\n{\n\n\t\"message\": all of your explanation, clarification or other commentary on the code\n\t\"code\": The relevant code for the answer\n}\n\n\n\nHere is an example of how the answer for a 'generate' request will look like. Do not answer in a differnt format or add other tags\n\n{\n\n\t\"message\": \"Here is the requested code\",\n\t\"code\": \"\\nfunction getRandomNumber(min, max) {\\n  if (typeof min !== 'number' || typeof max !== 'number' || min > max) {\\n    console.error('Invalid arguments: min and max must be numbers, and min must be less than or equal to max.');\\n    return NaN; // Return Not-a-Number for invalid input\\n  }\\n  // Generate a random number between min (inclusive) and max (inclusive)\\n  return Math.floor(Math.random() * (max - min + 1)) + min;\\n}\\n\"\n}\nAnother example:\n{\n\n\t\"message\": \"This query selects all columns in table tbl1\",\n\t\"code\": \"\"\n}\n\n\nDo not include tags for code section in the answer such as \n```javascript or ```sql. Output code in normal text format\nIf the task is 'generate', leave the 'message' field empty.\nMake sure to escape all special characters in your response so the output can be used as JSON string\n\n\n\n\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        680,
+        20
+      ],
+      "id": "7989c579-bd16-4981-87ab-530cc60bb8be",
+      "name": "AI Agent - Code generator",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "maxTries": null
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "de8b42ec-7034-484e-9ebf-aee3c1bf69c5",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        60,
+        100
+      ],
+      "id": "97747141-fd81-49d0-80da-985035f65abc",
+      "name": "Webhook",
+      "webhookId": "de8b42ec-7034-484e-9ebf-aee3c1bf69c5"
+    },
+    {
+      "parameters": {
+        "content": "## Main AI flow\n",
+        "height": 720,
+        "width": 1260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f8f64f66-e5c7-418c-95c1-6433922ff662",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n    \"task\": {{ JSON.stringify($('Webhook').item.json.body.task) }},\n    \"language\":  {{ JSON.stringify($('Webhook').item.json.body.language) }},\n    \"message\":{{ JSON.stringify($json.output.parseJson().message || \"\") }},\n   \"code\":{{ JSON.stringify($json.output.parseJson().code || \"\") }}\n}\n\n\n  \n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1340,
+        80
+      ],
+      "id": "b5a5ae25-304f-47cd-9760-26dff1b947e3",
+      "name": "Respond to Webhook1",
+      "alwaysOutputData": true,
+      "retryOnFail": false,
+      "maxTries": 2,
+      "waitBetweenTries": 200
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"message\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"code\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t\t\n\t}\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1580,
+        400
+      ],
+      "id": "ac3911a7-6771-4e3e-bec6-8abfba099f02",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('Webhook').item.json.headers.cookie}}",
+        "tableName": "n8n_chat_histories_2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        1080,
+        640
+      ],
+      "id": "6cdab5ba-cbcb-485a-9694-b2d0d957cf2a",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "Tv1uFCb0aPrESwP5",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "ic_coding_assistant",
+          "mode": "id"
+        },
+        "options": {
+          "frequencyPenalty": -0.4,
+          "maxTokens": 10888,
+          "responseFormat": "json_object",
+          "presencePenalty": -0.4,
+          "temperature": 0.1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        260,
+        440
+      ],
+      "id": "c1d9176b-7a13-44c2-abe3-bbfeb4253e4a",
+      "name": "OpenAI Chat Model"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "501c059e-5d14-4413-9e04-f6c634eef9bc",
+              "name": "output",
+              "value": "={{$json.output.trim().removeTags().removeMarkdown().replaceAll(\"\\n`\",\"\")}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1080,
+        100
+      ],
+      "id": "41949cc3-85bb-4fb7-b408-44259120a89d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "maxOutputTokens": 16192,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        540,
+        320
+      ],
+      "id": "6d65b607-2bbd-49f4-a35e-496296dd4c9d",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI Agent - Code generator": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "963afe35-ad14-402f-b1ac-767272db0295",
+  "owner": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}

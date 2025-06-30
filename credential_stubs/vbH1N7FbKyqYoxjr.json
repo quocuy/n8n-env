@@ -1,0 +1,14 @@
+{
+  "id": "vbH1N7FbKyqYoxjr",
+  "name": "Supabase account",
+  "type": "supabaseApi",
+  "data": {
+    "host": "",
+    "serviceRole": ""
+  },
+  "ownedBy": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  }
+}

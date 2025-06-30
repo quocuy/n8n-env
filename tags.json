@@ -7,7 +7,44 @@
     {
       "id": "Quzdv6h8W62svHuX",
       "name": "test"
+    },
+    {
+      "id": "YYnkdlqI72UEe2ZY",
+      "name": "DSL"
     }
   ],
-  "mappings": []
+  "mappings": [
+    {
+      "workflowId": "kEsxvm4QUgUBxRuF",
+      "tagId": "25IxyoLNW4OzF0vr"
+    },
+    {
+      "workflowId": "kEsxvm4QUgUBxRuF",
+      "tagId": "Quzdv6h8W62svHuX"
+    },
+    {
+      "workflowId": "2M3audfslYH2lBzB",
+      "tagId": "25IxyoLNW4OzF0vr"
+    },
+    {
+      "workflowId": "2M3audfslYH2lBzB",
+      "tagId": "Quzdv6h8W62svHuX"
+    },
+    {
+      "workflowId": "ew3CaVg1UtgGPZhA",
+      "tagId": "25IxyoLNW4OzF0vr"
+    },
+    {
+      "workflowId": "ew3CaVg1UtgGPZhA",
+      "tagId": "Quzdv6h8W62svHuX"
+    },
+    {
+      "workflowId": "ew3CaVg1UtgGPZhA",
+      "tagId": "YYnkdlqI72UEe2ZY"
+    },
+    {
+      "workflowId": "oxU1zPUlvgzSumtN",
+      "tagId": "Quzdv6h8W62svHuX"
+    }
+  ]
 }
