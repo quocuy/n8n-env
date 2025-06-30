@@ -1,0 +1,61 @@
+{
+  "id": "O5fVPcFtjTm8C6DY",
+  "name": "My workflow 2",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "8544d46f-57a5-4487-9828-91b1ed41a2a3",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "collection": "application",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.mongoDb",
+      "typeVersion": 1.1,
+      "position": [
+        220,
+        0
+      ],
+      "id": "430f6796-5062-43e9-ac94-3cd461bbd00b",
+      "name": "MongoDB",
+      "credentials": {
+        "mongoDb": {
+          "id": "ELMU9gpD4wMkRDkF",
+          "name": "MongoDB from Public API 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "MongoDB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "0b3d946c-9fc2-4d97-946f-7f8d6ec42c5b",
+  "owner": {
+    "type": "personal",
+    "personalEmail": "service@acp.vnpt.vn"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}

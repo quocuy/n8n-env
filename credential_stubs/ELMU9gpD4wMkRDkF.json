@@ -1,0 +1,14 @@
+{
+  "id": "ELMU9gpD4wMkRDkF",
+  "name": "MongoDB from Public API 2",
+  "type": "mongoDb",
+  "data": {
+    "configurationType": "",
+    "connectionString": "",
+    "database": ""
+  },
+  "ownedBy": {
+    "type": "personal",
+    "personalEmail": "service@acp.vnpt.vn"
+  }
+}
