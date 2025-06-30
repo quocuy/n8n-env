@@ -1,0 +1,30 @@
+{
+  "id": "u63TPk5GnsYbMWsh",
+  "name": "My workflow 6",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e3978ecc-60e3-4f27-8b58-100a00a9a61e",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "43a1ccd7-5e2b-4f68-89d2-18f87ece5752",
+  "owner": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  },
+  "parentFolderId": "YiLqMjBu3pCgYjMA",
+  "isArchived": false
+}
