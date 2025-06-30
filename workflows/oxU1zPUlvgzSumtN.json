@@ -1,0 +1,299 @@
+{
+  "id": "oxU1zPUlvgzSumtN",
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "maxOutputTokens": 16192,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ],
+      "id": "563556c3-e84a-4c2a-8730-b1bfcc4e05b4",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is a {{ JSON.stringify($json.output.task) }} task using {{ JSON.stringify($json.output.language) }}  language.\nThe user request is: {{  JSON.stringify($json.output.message) }}  . \n{{ $if(($json.output.task)!==\"generate\",\"The snippet code to work on is: \".concat($json.code),\"\") }}  \n\n\n{{ $if($json.output.context  ,\"Additional code context: \".concat($json.body.context),\"Use the previous context if applicable.\") }} \n\n{{ $if($json.output.dsl,\"The related VNPT Composable DSL is: \".concat($json.body.dsl),\"\") }} ",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpful coding assistant. The current UNIX datetime is {{ $now.format('x') }} \n\nYour task is to help users to design application for a low code platform called VNPT Composable based on Lowcoder by provide coding assistant. The user will ask you in either English or Vietnamese. Your response must match the languauge used by the user.\n\nThe user will provide the following information:\n- The type of tasks\n- The programming language\n- The user request\n- Additional code context\n\n\nFor the type of tasks, you can do the following tasks by user request:\n- \"generate\": Generate code by the request of the user\n- \"fix\": Edit/fix specific code snippet\n- \"explain\": Explain code snippet\n\nThe user request are what the user want you to do.  Some example of tasks are \"explaning this code\" or \"optimize this code for performance\"\n\nIf the type of task are \"fix\" or \"explain\" then user will also specify the code snippet to work on.\n\nThese are some programming languages that user may ask by saying \"the programming language is: \". Your response code must follow the correct syntax of the specific language based on the language requested:\n- \"postgres\": PostgresSQL\n- \"javascript\" Javascript\n- \"oracle\": Oracle SQL\n- \"mongodb\": MongoDB\n- \"mariadb\": MariaDB SQL\n- \"mysql\": MySQL\n- \"mssql\": Microsoft SQL Server\n\nThe user may also provide additional code context that describe the full code related to the task user requested. The content of the context can be the table structure of related SQL tables for the task or the full code of the program that includes the code snippet to be edited.\n\nAdditionally, the user may also provide the data structure language or DSL of the relevant VNPT Composable application in JSON format by announcing \"The related VNPT Composable DSL is: \". The content of the DSL is the configuration information of the Lowcoder/VNPT Composable application that the JS/SQL code is connected to.\n\nAvoid using double quotes in your response, use single quotes instead. Wrap the relevant code blocks in approriate tags. Values inside the answer must be parsable in JSON string format to avoid parsing problems. You response should be helpful and descriptive to the user. If users attempt to derail the conversation by asking non coding related query, ask them to stay on topic.\n\nYou are to answer in JSON format and your response must have these two following field:\n\n\"message\": your explanation, clarification or other commentary\n\"code\": The relevant code for the answer\n\nHere is an example of how the answer will look like\n```json\n{\n\t\"message\": \"Here is the requested code\",\n\t\"code\": \"```javascript\\nfunction getRandomNumber(min, max) {\\n  if (typeof min !== 'number' || typeof max !== 'number' || min > max) {\\n    console.error('Invalid arguments: min and max must be numbers, and min must be less than or equal to max.');\\n    return NaN; // Return Not-a-Number for invalid input\\n  }\\n  // Generate a random number between min (inclusive) and max (inclusive)\\n  return Math.floor(Math.random() * (max - min + 1)) + min;\\n}\\n```\"\n}\n```\n\nIf the task is 'generate', leave the 'message' field empty.\nMake sure to escape all special characters in your response so the output can be used as JSON string\n\n\n\n",
+          "maxIterations": 8
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        1100,
+        120
+      ],
+      "id": "1fbcd471-af8a-4f2e-b3d3-92a38b6ff765",
+      "name": "AI Agent - Code generator",
+      "alwaysOutputData": false,
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "maxTries": null
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ebc08d26-71d2-44bc-bd05-844e53669e3e",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*",
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        500,
+        120
+      ],
+      "id": "4dd139b9-60b6-4011-9d2a-0ba552a35d7c",
+      "name": "Webhook",
+      "webhookId": "ebc08d26-71d2-44bc-bd05-844e53669e3e"
+    },
+    {
+      "parameters": {
+        "content": "## Main AI flow\n",
+        "height": 720,
+        "width": 1260
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        440,
+        -80
+      ],
+      "id": "62fc8db3-6929-47b0-abed-f2dab83fb3f9",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n\t\"type\": \"object\",\n\t\"properties\": {\n\t\t\"message\": {\n\t\t\t\"type\": \"string\"\n\t\t},\n\t\t\"code\": {\n\t\t\t\"type\": \"string\"\n\t\t}\n\t\t\n\t},\n  \"required\":[\"message\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        540
+      ],
+      "id": "4fefe1e2-4366-4f0e-aca6-927f971bc949",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserAutofixing",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        300
+      ],
+      "id": "02a986eb-df53-4ceb-8cda-e42507e96cf1",
+      "name": "Auto-fixing Output Parser"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "maxOutputTokens": 16192,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1000,
+        520
+      ],
+      "id": "a62766cf-b797-4936-95d4-7d86f4673644",
+      "name": "Google Gemini Chat Model1"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{$('When Executed by Another Workflow').item.json.session_id}}",
+        "tableName": "n8n_chat_histories_2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        680,
+        500
+      ],
+      "id": "89742ab6-5272-4550-b644-41f69dabeaa8",
+      "name": "Postgres Chat Memory"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            },
+            {
+              "name": "session_id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        340,
+        -280
+      ],
+      "id": "542e67fa-f59f-42c3-b87e-10a37a580e09",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "text": "={{ JSON.stringify($json.query) }}",
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"$schema\": \"http://json-schema.org/draft-07/schema#\",\n  \"title\": \"Generated schema for Root\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"task\": {\n      \"enum\": [\"fix\",\"edit\",\"generate\"]\n    },\n    \"language\": {\n      \"enum\": [\"postgres\",\"javascript\",\"oracle\",\"mongodb\",\"mariadb\",\"mysql\",\"mssql\"]\n    },\n    \"message\": {\n      \"type\": \"string\"\n    },\n    \"code\": {\n      \"type\": \"string\"\n    },\n    \"context\": {\n      \"type\": \"string\"\n    },\n    \"dsl\": {\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"task\",\n    \"language\",\n    \"message\"\n\n    \n  ]\n}",
+        "options": {
+          "systemPromptTemplate": "You are an expert extraction algorithm.\nOnly extract relevant information from the text.\nThe user give you a coding related request in either English or Vietnamese. Extract the following information from the request:\ntask: The type of task that the user is asking.\nlanguage: the programming language related to the request. If the user is asking for SQL without specifying the specific implementation, use Postgres SQL as the language\nmessage: The user's request message\ncode: the relevant code to be worked on.\ncontext: additional context of the request, this could be table structure of related SQL tables. Field is optional\ndsl: The data structure language of the application that the request is referred to. The dsl is in JSON string format and can be optional.\n\n\nIf you do not know the value of an attribute asked to extract, you may omit the attribute's value."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1,
+      "position": [
+        620,
+        -260
+      ],
+      "id": "e5d2d530-ef47-4df0-b4bb-30b664639848",
+      "name": "Information Extractor"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-flash-preview-05-20",
+        "options": {
+          "maxOutputTokens": 16192,
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        320,
+        40
+      ],
+      "id": "78a0e151-4601-4e0e-b7cf-5d24bc0928f7",
+      "name": "Google Gemini Chat Model2"
+    }
+  ],
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Auto-fixing Output Parser",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Auto-fixing Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Auto-fixing Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Agent - Code generator",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "72e31011-a89d-47ab-a7c2-27ba26ba7e4f",
+  "owner": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}

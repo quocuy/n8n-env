@@ -1,0 +1,13 @@
+{
+  "id": "B4TvwlpfNX3hiNRT",
+  "name": "Google Drive account",
+  "type": "googleDriveOAuth2Api",
+  "data": {
+    "clientId": ""
+  },
+  "ownedBy": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  }
+}

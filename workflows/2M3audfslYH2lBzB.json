@@ -1,0 +1,985 @@
+{
+  "id": "2M3audfslYH2lBzB",
+  "name": "My workflow 4",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        800
+      ],
+      "id": "6ea64de3-0aa9-4810-b472-354fe38359bd",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "=output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        200
+      ],
+      "id": "f523f629-c442-430d-b8fe-c73a9bb4696c",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        220
+      ],
+      "id": "6ed00a2b-eae5-4897-beec-a024b5033c52",
+      "name": "Embeddings Google Gemini -text-embedding-"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1v7KSOm-O6UsZAWcvf6501xvle30foxcO",
+          "mode": "list",
+          "cachedResultName": "all-components-templates-format-stringify.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1v7KSOm-O6UsZAWcvf6501xvle30foxcO/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -680,
+        200
+      ],
+      "id": "a11699b2-d3f3-4049-88bc-3a6bcd38e422",
+      "name": "GDrive: get components template file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "B4TvwlpfNX3hiNRT",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1M1k9MG5HDABkg_G6J8aF5zCp0e7LXvz1",
+          "mode": "list",
+          "cachedResultName": "all-layout-templates-format-stringify.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1M1k9MG5HDABkg_G6J8aF5zCp0e7LXvz1/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -680,
+        800
+      ],
+      "id": "e42c7926-44ec-43a5-a643-a6d90298e6a0",
+      "name": "GDrive: get layouttemplate file"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "=output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        800
+      ],
+      "id": "77cafb80-a91d-4de3-b321-7473b29c1560",
+      "name": "Extract from File1"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Split Out template data').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        120,
+        240
+      ],
+      "id": "bf11c09e-60be-4d44-b07b-e21a97bcb80b",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        200,
+        420
+      ],
+      "id": "d76eccbc-3f5e-401a-88ac-f80217d1c93b",
+      "name": "Recursive Character Text Splitter1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "layouts",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "content",
+              "condition": "eq",
+              "keyValue": "={{ $('Split Out layout data').item.json.text }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "template",
+              "fieldValue": "={{ $('Split Out layout data').item.json.template }}"
+            },
+            {
+              "fieldId": "keywords",
+              "fieldValue": "={{ $('Split Out layout data').item.json.keywords }}"
+            },
+            {
+              "fieldId": "note",
+              "fieldValue": "={{ $('Split Out layout data').item.json.note||\"\" }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        800
+      ],
+      "id": "ac02d69c-eed9-4f11-b9da-d20081828e45",
+      "name": "Supabase"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "layouts",
+          "mode": "list",
+          "cachedResultName": "layouts"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "id": "792d08c2-5427-470a-b025-33e68eda03b7",
+      "name": "Insert into Supabase layout vector store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        0,
+        600
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {}
+      },
+      "id": "659deb18-814d-444d-aacf-dd80a51b111f",
+      "name": "Insert into Supabase component template Vectorstore",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Split Out layout data').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        120,
+        840
+      ],
+      "id": "eaf81fd9-6e30-4393-9537-0fcc3bec83fd",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        200,
+        1020
+      ],
+      "id": "3031876c-2d7e-484a-b736-9b3bb0c0c263",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        200
+      ],
+      "id": "3326adf0-d220-4cd5-b4f0-d2a0c78f55c2",
+      "name": "Split Out template data"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        800
+      ],
+      "id": "d237cab5-7dbe-4147-8a02-4d9d0976c169",
+      "name": "Split Out layout data"
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        820
+      ],
+      "id": "82f0eaca-7e6d-4edf-842e-b291d5e1374a",
+      "name": "Embeddings Google Gemini -text-embedding-2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "documents",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "content",
+              "condition": "eq",
+              "keyValue": "={{ $('Split Out template data').item.json.text }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "template",
+              "fieldValue": "={{ $('Split Out template data').item.json.template }}"
+            },
+            {
+              "fieldId": "keywords",
+              "fieldValue": "={{ $('Split Out template data').item.json.keywords }}"
+            },
+            {
+              "fieldId": "note",
+              "fieldValue": "={{ $('Split Out template data').item.json.note||\"\" }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        200
+      ],
+      "id": "ce3c5944-8bb4-4a9f-89d9-ee3a6943874a",
+      "name": "Supabase1"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1FscVRNhLLcbZtTOS5NvsJElH4105yt1i",
+          "mode": "list",
+          "cachedResultName": "all-query-types-templates-format-stringify.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1FscVRNhLLcbZtTOS5NvsJElH4105yt1i/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -680,
+        1400
+      ],
+      "id": "2b0c977b-28a0-4f62-9cd9-60015f375dde",
+      "name": "GDrive: get layouttemplate file1"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "=output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        1400
+      ],
+      "id": "b03a66db-6bbc-4683-b525-923609376e2e",
+      "name": "Extract from File2"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "query_types",
+          "mode": "list",
+          "cachedResultName": "query_types"
+        },
+        "options": {
+          "queryName": "match_query_types"
+        }
+      },
+      "id": "e3a0697c-6168-4457-93bc-206fd9d3d3df",
+      "name": "Insert into Supabase layout vector store1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        0,
+        1400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        1680
+      ],
+      "id": "aa67b25f-f617-4477-921d-5f9fb1b9a79b",
+      "name": "Embeddings Google Gemini -text-embedding-6"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "query_types",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "content",
+              "condition": "eq",
+              "keyValue": "={{ $('Split Out query types data').item.json.text }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "template",
+              "fieldValue": "={{ $('Split Out query types data').item.json.template }}"
+            },
+            {
+              "fieldId": "keywords",
+              "fieldValue": "={{ $('Split Out query types data').item.json.keywords }}"
+            },
+            {
+              "fieldId": "note",
+              "fieldValue": "={{ $('Split Out query types data').item.json.note||\"\" }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        500,
+        1400
+      ],
+      "id": "0c906d71-66aa-4d06-b2e5-aeacfa17d243",
+      "name": "Supabase3"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        300,
+        1800
+      ],
+      "id": "4589be19-d6a5-4f61-9374-141c0615d66f",
+      "name": "Recursive Character Text Splitter2"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Split Out query types data').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        240,
+        1600
+      ],
+      "id": "aae94cef-f3a6-40b9-892a-b4676001acd0",
+      "name": "Default Data Loader2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        1400
+      ],
+      "id": "ab10ce54-c0a3-4ff1-9b07-cd0b784ecf67",
+      "name": "Split Out query types data"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1FscVRNhLLcbZtTOS5NvsJElH4105yt1i",
+          "mode": "list",
+          "cachedResultName": "all-datasources-types-templates-format-stringify.json",
+          "cachedResultUrl": "https://drive.google.com/file/d/1FscVRNhLLcbZtTOS5NvsJElH4105yt1i/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -680,
+        1940
+      ],
+      "id": "9cfc201c-cf70-444c-b397-68ba35b5c8fe",
+      "name": "GDrive: get layouttemplate file2"
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "destinationKey": "=output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -460,
+        1940
+      ],
+      "id": "b62504c3-927e-4ea2-8f0e-db0534b129f5",
+      "name": "Extract from File3"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "datasources_types",
+          "mode": "list",
+          "cachedResultName": "datasources_types"
+        },
+        "options": {
+          "queryName": "match_datasources_types"
+        }
+      },
+      "id": "35849501-2235-4885-a2d6-a7145bc714d3",
+      "name": "Insert into Supabase layout vector store2",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "position": [
+        0,
+        1940
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelName": "models/text-embedding-004"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -180,
+        2220
+      ],
+      "id": "28c0b425-ef73-4ba8-8618-828f539ed313",
+      "name": "Embeddings Google Gemini -text-embedding-7"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "datasources_types",
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "content",
+              "condition": "eq",
+              "keyValue": "={{ $('Split Out query types data1').item.json.text }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "template",
+              "fieldValue": "={{ $('Split Out query types data1').item.json.template }}"
+            },
+            {
+              "fieldId": "keywords",
+              "fieldValue": "={{ $('Split Out query types data1').item.json.keywords }}"
+            },
+            {
+              "fieldId": "note",
+              "fieldValue": "={{ $('Split Out query types data1').item.json.note||\"\" }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        500,
+        1940
+      ],
+      "id": "f5cdf518-95a3-4445-bb02-4fba94dff3ea",
+      "name": "Supabase4"
+    },
+    {
+      "parameters": {
+        "chunkSize": 600,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        300,
+        2340
+      ],
+      "id": "44772b92-0bea-4429-88f0-b17ae15cb4f4",
+      "name": "Recursive Character Text Splitter3"
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Split Out query types data1').item.json.text }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        240,
+        2140
+      ],
+      "id": "61fe9aee-6ad3-40ba-9ae1-b65a91a6bdda",
+      "name": "Default Data Loader3"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "output",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        1940
+      ],
+      "id": "d33e3e9e-27c4-42da-a222-da0a0ce338bf",
+      "name": "Split Out query types data1"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "GDrive: get layouttemplate file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GDrive: get components template file",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GDrive: get layouttemplate file1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "GDrive: get layouttemplate file2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Split Out template data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert into Supabase component template Vectorstore",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GDrive: get components template file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GDrive: get layouttemplate file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File1": {
+      "main": [
+        [
+          {
+            "node": "Split Out layout data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert into Supabase component template Vectorstore",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter1": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Supabase layout vector store": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Supabase component template Vectorstore": {
+      "main": [
+        [
+          {
+            "node": "Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out template data": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase component template Vectorstore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out layout data": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GDrive: get layouttemplate file1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File2": {
+      "main": [
+        [
+          {
+            "node": "Split Out query types data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Supabase layout vector store1": {
+      "main": [
+        [
+          {
+            "node": "Supabase3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-6": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter2": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader2",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader2": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out query types data": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GDrive: get layouttemplate file2": {
+      "main": [
+        [
+          {
+            "node": "Extract from File3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File3": {
+      "main": [
+        [
+          {
+            "node": "Split Out query types data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert into Supabase layout vector store2": {
+      "main": [
+        [
+          {
+            "node": "Supabase4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini -text-embedding-7": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter3": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader3",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader3": {
+      "ai_document": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store2",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out query types data1": {
+      "main": [
+        [
+          {
+            "node": "Insert into Supabase layout vector store2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "08216a73-9dee-4e77-98d5-4955e61d87fc",
+  "owner": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}
