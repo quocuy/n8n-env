@@ -1,0 +1,17 @@
+{
+  "id": "Tv1uFCb0aPrESwP5",
+  "name": "Postgres account",
+  "type": "postgres",
+  "data": {
+    "host": "",
+    "user": "",
+    "password": "",
+    "allowUnauthorizedCerts": true,
+    "port": 6543
+  },
+  "ownedBy": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  }
+}
