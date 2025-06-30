@@ -1,0 +1,15 @@
+{
+  "id": "hXxgjYxmohhRwoTk",
+  "name": "Mongo lowcoder 4",
+  "type": "mongoDb",
+  "data": {
+    "configurationType": "",
+    "connectionString": "",
+    "database": ""
+  },
+  "ownedBy": {
+    "type": "team",
+    "teamId": "tr8XxEmTkVs5C3tZ",
+    "teamName": "Project by public api"
+  }
+}

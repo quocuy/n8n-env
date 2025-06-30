@@ -1,0 +1,18 @@
+{
+  "id": "K18dthb5QWb3X2lu",
+  "name": "MongoDB from Public API",
+  "type": "mongoDb",
+  "data": {
+    "configurationType": "",
+    "connectionString": "",
+    "host": "",
+    "port": 27017,
+    "user": "",
+    "password": "",
+    "tls": false
+  },
+  "ownedBy": {
+    "type": "personal",
+    "personalEmail": "service@acp.vnpt.vn"
+  }
+}

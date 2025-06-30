@@ -1,0 +1,166 @@
+{
+  "id": "CXnaEtA5py9J2dwp",
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "get-message",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "97fc35d3-a24c-4f28-b841-8a53cfe1f1ee",
+      "name": "Webhook - Start",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        60
+      ],
+      "webhookId": "multilingual-webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "validation-success",
+              "leftValue": "={{ $json.success }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equal"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ebb270c1-459f-463a-a748-954c140c9734",
+      "name": "IF - Validation Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -260,
+        60
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ \n  {\n    \"status\": \"success\",\n    \"data\": {\n      \"message\": $json.message,\n      \"language\": $json.language,\n      \"timestamp\": $json.timestamp\n    },\n    \"meta\": {\n      \"supported_languages\": $json.debug.supported_languages,\n      \"processed_language\": $json.debug.processed_language\n    }\n  }\n}}",
+        "options": {}
+      },
+      "id": "b2555f38-b00a-4434-ad3b-050fc8cdc503",
+      "name": "Respond - Success",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ \n  {\n    \"status\": \"error\",\n    \"message\": \"Failed to process request\",\n    \"debug\": $json.debug\n  }\n}}",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "id": "db1ee803-00fd-4c22-b86e-2b8ab2939702",
+      "name": "Respond - Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Demo function để test các message types khác nhau\nconst testCases = [\n  {\n    language: 'vi',\n    category: 'messages',\n    key: 'welcome',\n    description: 'Vietnamese welcome message'\n  },\n  {\n    language: 'en', \n    category: 'notifications',\n    key: 'new_order',\n    params: { order_id: 'ORD-12345' },\n    description: 'English notification with parameter'\n  },\n  {\n    language: 'ja',\n    category: 'emails',\n    key: 'greeting',\n    params: { name: '田中さん' },\n    description: 'Japanese email greeting'\n  },\n  {\n    language: 'invalid_lang',\n    category: 'messages', \n    key: 'success',\n    description: 'Test fallback to English'\n  }\n];\n\nreturn testCases.map((testCase, index) => ({\n  id: index + 1,\n  ...testCase\n}));"
+      },
+      "id": "ee19776d-b8c5-4248-a11e-7294ee9a9d54",
+      "name": "Function - Generate Test Data",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        -700,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Định nghĩa language pack\nlet LANGUAGE_PACK = $vars.language.replaceAll('\\n','');\nLANGUAGE_PACK= JSON.stringify(LANGUAGE_PACK);\n// Hàm lấy message đa ngôn ngữ với fallback\nfunction getLocalizedMessage(language, category, key, params = {}) {\n  // Danh sách ngôn ngữ được hỗ trợ\n  const supportedLanguages = ['vi', 'en', 'ja'];\n  \n  // Validate language, fallback to 'en' if not supported\n  const validLanguage = supportedLanguages.includes(language) ? language : 'en';\n\n  // Lấy message từ language pack\n  let message = LANGUAGE_PACK[validLanguage]?.[category]?.[key];\n  \n  // Fallback to English if message not found\n  // if (!message && validLanguage !== 'en') {\n  //   message = LANGUAGE_PACK['en']?.[category]?.[key];\n  // }\n  \n  // Fallback to default message if still not found\n  if (!message) {\n    // message = `Message not found: ${category}.${key}`;\n    message = `Message not found: ${LANGUAGE_PACK}`;\n  }\n  \n  // Replace parameters in message\n  // if (typeof message === 'string' && Object.keys(params).length > 0) {\n  //   Object.keys(params).forEach(param => {\n  //     const regex = new RegExp(`{{${param}}}`, 'g');\n  //     message = message.replace(regex, params[param]);\n  //   });\n  // }\n  \n  return message;\n}\n\n// Lấy dữ liệu từ webhook\nconst requestData = $input.first().json.query;\n\n// Extract language và message key từ request\nconst userLanguage = requestData.language || requestData.lang || 'en';\nconst messageCategory = requestData.category || 'messages';\nconst messageKey = requestData.key || requestData.message_key || 'welcome';\nconst messageParams = requestData.params || {};\n\n// Lấy message đã localize\nconst localizedMessage = getLocalizedMessage(\n  userLanguage, \n  messageCategory, \n  messageKey, \n  messageParams\n);\n\n// Thông tin debug\nconst debugInfo = {\n  original_language: requestData.language,\n  processed_language: userLanguage,\n  category: messageCategory,\n  key: messageKey,\n  params: messageParams,\n  supported_languages: ['vi', 'en', 'ja']\n};\n\n// Trả về kết quả\nreturn {\n  success: true,\n  language: userLanguage,\n  message: localizedMessage,\n  debug: debugInfo,\n  timestamp: new Date().toISOString()\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -480,
+        60
+      ],
+      "id": "fdb38deb-2b7d-4b77-8767-f65652f900e0",
+      "name": "Function - Localize Message1"
+    }
+  ],
+  "connections": {
+    "Webhook - Start": {
+      "main": [
+        [
+          {
+            "node": "Function - Localize Message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IF - Validation Check": {
+      "main": [
+        [
+          {
+            "node": "Respond - Success",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond - Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Function - Localize Message1": {
+      "main": [
+        [
+          {
+            "node": "IF - Validation Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "5dc259cb-2a01-4271-a15e-12908df149ca",
+  "owner": {
+    "type": "personal",
+    "personalEmail": "service@acp.vnpt.vn"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}
