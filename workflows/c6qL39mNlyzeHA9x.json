@@ -1,0 +1,81 @@
+{
+  "id": "c6qL39mNlyzeHA9x",
+  "name": "AI Error handling",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -240,
+        -220
+      ],
+      "id": "4a888ce0-cfaa-43e2-861c-c3b6e642e6cb",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "tableId": "Errors",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "workflow_id",
+              "fieldValue": "={{ $json.workflow.id }}"
+            },
+            {
+              "fieldId": "workflow_name",
+              "fieldValue": "={{ $json.workflow.name }}"
+            },
+            {
+              "fieldId": "error",
+              "fieldValue": "={{ $json.execution.error.message }}"
+            },
+            {
+              "fieldId": "stacktrace",
+              "fieldValue": "={{ $json.execution.error.stack }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        300,
+        -300
+      ],
+      "id": "80ac418a-a4b4-432a-a42d-cea3333473e5",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "vbH1N7FbKyqYoxjr",
+          "name": "Supabase account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "triggerCount": 0,
+  "versionId": "98db4199-ff24-403d-8230-070aafa21b9d",
+  "owner": {
+    "type": "team",
+    "teamId": "FyGmlFylX6cHy6Ty",
+    "teamName": "My project"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}

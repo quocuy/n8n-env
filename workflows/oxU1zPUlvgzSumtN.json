@@ -17,7 +17,13 @@
         400
       ],
       "id": "563556c3-e84a-4c2a-8730-b1bfcc4e05b4",
-      "name": "Google Gemini Chat Model"
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
@@ -119,7 +125,13 @@
         520
       ],
       "id": "a62766cf-b797-4936-95d4-7d86f4673644",
-      "name": "Google Gemini Chat Model1"
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     },
     {
       "parameters": {
@@ -134,7 +146,13 @@
         500
       ],
       "id": "89742ab6-5272-4550-b644-41f69dabeaa8",
-      "name": "Postgres Chat Memory"
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "Tv1uFCb0aPrESwP5",
+          "name": "Postgres account"
+        }
+      }
     },
     {
       "parameters": {
@@ -191,7 +209,13 @@
         40
       ],
       "id": "78a0e151-4601-4e0e-b7cf-5d24bc0928f7",
-      "name": "Google Gemini Chat Model2"
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "kiUmgpYubZpjVsrA",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
     }
   ],
   "connections": {
@@ -287,8 +311,8 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "triggerCount": 0,
-  "versionId": "72e31011-a89d-47ab-a7c2-27ba26ba7e4f",
+  "triggerCount": 1,
+  "versionId": "fefe449b-244e-463e-81cb-63e6d7388271",
   "owner": {
     "type": "team",
     "teamId": "tr8XxEmTkVs5C3tZ",
